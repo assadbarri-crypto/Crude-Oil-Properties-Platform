@@ -7,7 +7,11 @@ from groq import Groq
 # ---------------------------------------------------------
 # 1. PAGE CONFIGURATION & CUSTOM CSS
 # ---------------------------------------------------------
-st.set_page_config(page_title="Crude Oil Properties Platform", layout="wide")
+st.set_page_config(
+    page_title="Crude Oil Properties Platform", 
+    page_icon="https://cdn-icons-png.flaticon.com/512/3344/3344638.png", # Clean oil drop icon
+    layout="wide"
+)
 
 # --- CSS FOR FONT COLORS, SIZES, AND BACKGROUND ---
 st.markdown("""
