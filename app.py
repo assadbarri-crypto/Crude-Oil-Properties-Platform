@@ -82,7 +82,20 @@ st.markdown("""
 def load_data():
     df = pd.read_excel("crude_oil_database_v6.xlsx")
     df = df.fillna("NA")
+    
+    # Fix Origin Typos
     df["Origin"] = df["Origin"].str.replace("British Colombia", "British Columbia", case=False)
+    
+    # --- NEW: Format Sample Numbers to always have 4 digits ---
+    def format_ests(val):
+        match = re.search(r'(\d+)', str(val))
+        if match:
+            # zfill(4) adds leading zeros until the number is 4 digits long
+            return f"ESTS {match.group(1).zfill(4)}"
+        return str(val)
+        
+    df["Sample_Number"] = df["Sample_Number"].apply(format_ests)
+    
     return df
 
 df = load_data()
