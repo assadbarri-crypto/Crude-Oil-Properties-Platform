@@ -440,6 +440,8 @@ if prompt := st.chat_input("E.g., Plot density versus viscosity for Gulf of Mexi
     
     IMPORTANT: If the user asks you to plot, graph, or compare two properties visually (e.g., Density vs Viscosity), 
     you MUST use the 'plot_data' tool.
+
+    If the user specifies a weathering fraction (like W0, W1), you MUST pass it to the 'weathering_filter' parameter in the plot_data tool.
     """
 
     # --- DEFINE THE PLOTTING TOOL ---
@@ -498,11 +500,14 @@ if prompt := st.chat_input("E.g., Plot density versus viscosity for Gulf of Mexi
                             x_col = function_args.get("x_column")
                             y_col = function_args.get("y_column")
                             origin = function_args.get("origin_filter")
+                            weathering = function_args.get("weathering_filter")
                             
                             # Filter the data for the plot
                             plot_df = df.copy()
                             if origin and origin != "All":
                                 plot_df = plot_df[plot_df["Origin"].str.contains(origin, case=False, na=False)]
+                            if weathering:
+                                plot_df = plot_df[plot_df["Weathering_Fraction"] == weathering]
                             
                             # Clean data for plotting
                             plot_df = plot_df.dropna(subset=[x_col, y_col])
@@ -517,21 +522,18 @@ if prompt := st.chat_input("E.g., Plot density versus viscosity for Gulf of Mexi
                                     y=y_col, 
                                     color="Sample_Number",
                                     hover_data=["Weathering_Fraction", "Origin"],
-                                    title=f"{y_col} vs {x_col} ({origin if origin else 'All Samples'})"
+                                    title=f"{y_col} vs {x_col} ({origin if origin else 'All'}) - {weathering if weathering else 'All Weatherings'}"
                                 )
                                 fig.update_layout(title_font=dict(size=16, color="red"), font=dict(size=12, color="#1f77b4"))
                                 
                                 st.plotly_chart(fig, use_container_width=True)
                                 
-                                # Create a temporary list for the tool response
-                                # We DO NOT save this to st.session_state to avoid the display error
+                                # Inform the AI that the plot was successful
                                 temp_messages = st.session_state.messages.copy()
                                 temp_messages.append(response_message)
                                 temp_messages.append({
-                                    "tool_call_id": tool_call.id, 
-                                    "role": "tool", 
-                                    "name": "plot_data", 
-                                    "content": f"Plot successfully generated for {len(plot_df)} data points."
+                                    "tool_call_id": tool_call.id, "role": "tool", "name": "plot_data", 
+                                    "content": f"Plot successfully generated for {len(plot_df)} data points with weathering filter: {weathering}."
                                 })
                             else:
                                 st.warning(f"Could not find data to plot for {x_col} and {y_col}.")
