@@ -523,10 +523,14 @@ if prompt := st.chat_input("E.g., Plot density versus viscosity for Gulf of Mexi
                                 
                                 st.plotly_chart(fig, use_container_width=True)
                                 
-                                # Inform the AI that the plot was successful
-                                st.session_state.messages.append(response_message)
-                                st.session_state.messages.append({
-                                    "tool_call_id": tool_call.id, "role": "tool", "name": "plot_data", 
+                                # Create a temporary list for the tool response
+                                # We DO NOT save this to st.session_state to avoid the display error
+                                temp_messages = st.session_state.messages.copy()
+                                temp_messages.append(response_message)
+                                temp_messages.append({
+                                    "tool_call_id": tool_call.id, 
+                                    "role": "tool", 
+                                    "name": "plot_data", 
                                     "content": f"Plot successfully generated for {len(plot_df)} data points."
                                 })
                             else:
@@ -535,10 +539,11 @@ if prompt := st.chat_input("E.g., Plot density versus viscosity for Gulf of Mexi
                     # 2. Second API Call: Ask AI to summarize the plot
                     second_response = client.chat.completions.create(
                         model="openai/gpt-oss-120b",
-                        messages=st.session_state.messages
+                        messages=temp_messages  # <--- CHANGE THIS FROM st.session_state.messages
                     )
                     answer = second_response.choices[0].message.content
                     st.markdown(answer)
+                    # Now we only save the simple text answer to the history
                     st.session_state.messages.append({"role": "assistant", "content": answer})
                 else:
                     # No tool needed, just print the text answer
