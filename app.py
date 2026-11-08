@@ -2,8 +2,9 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import re
+import json
 from groq import Groq
-
+import io
 # ---------------------------------------------------------
 # 1. PAGE CONFIGURATION & CUSTOM CSS
 # ---------------------------------------------------------
@@ -378,7 +379,7 @@ if compare_samples and compare_properties:
             st.warning(f"No SARA data available for the selected samples at {compare_weathering}.")
 
 # ---------------------------------------------------------
-# 5. AI CHATBOT ASSISTANT (Groq)
+# 5. AI CHATBOT ASSISTANT (Groq + Plotting Tool)
 # ---------------------------------------------------------
 st.divider()
 st.header("🤖 AI Data Assistant")
@@ -387,7 +388,7 @@ if st.button("🗑️ Clear Chat History"):
     st.session_state.messages = []
     st.rerun()
 
-st.markdown("Ask a question about the database, or ask a general question about crude oil.")
+st.markdown("Ask a question about the database, or ask the AI to plot properties.")
 
 # --- REPLACE WITH YOUR API KEY ---
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"] 
@@ -400,65 +401,151 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("E.g., Which Gulf of Mexico sample has the highest Viscosity at 15C?"):
+if prompt := st.chat_input("E.g., Plot density versus viscosity for Gulf of Mexico"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # --- SMART RETRIEVAL: Filter the data based on the user's prompt ---
-    # We create a smaller dataframe to send to the AI to save tokens.
-    # If the user mentions a location, we filter by it.
+    # --- SMART RETRIEVAL ---
     search_df = df.copy()
     prompt_lower = prompt.lower()
     
     # Check if the user is asking about a specific origin
     found_origin = False
     for origin in df["Origin"].unique():
-        # If a word in the origin (like "gulf", "alaska") is in the prompt
         if str(origin).lower().split(",")[0] in prompt_lower:
             search_df = df[df["Origin"] == origin]
             found_origin = True
             break
             
-    # If they ask about a specific sample number (e.g., ESTS 506)
+    # If they ask about a specific sample number
     ests_match = re.search(r'(ests\s?\d+)', prompt_lower)
     if ests_match:
         search_df = df[df["Sample_Number"].str.lower() == ests_match.group(1).replace(" ", " ").strip()]
         
-    # If we didn't find a specific filter, just send the first 50 rows to give context
     if len(search_df) == len(df):
         search_df = df.head(50)
 
-    # Send the filtered data to the AI!
     data_context = search_df.to_csv(index=False) 
 
     system_instruction = f"""
     You are an expert petrochemical data assistant. 
-    You have access to a sample of the following crude oil database in CSV format:
+    You have access to the following crude oil database in CSV format:
     
     {data_context}
     
     Answer the user's question accurately based ONLY on the data provided above. 
     If the specific sample or property is not in this sample view, tell the user to use the dropdowns above to view it.
     If the data is 'NA', tell the user it is not available.
+    
+    IMPORTANT: If the user asks you to plot, graph, or compare two properties visually (e.g., Density vs Viscosity), 
+    you MUST use the 'plot_data' tool.
     """
+
+    # --- DEFINE THE PLOTTING TOOL ---
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "plot_data",
+                "description": "Create a scatter plot to compare two numerical properties (e.g., Density vs Viscosity) for a specific origin or sample.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "x_column": {
+                            "type": "string", 
+                            "description": "The exact column name for the X-axis (e.g., 'Density @ 15C')."
+                        },
+                        "y_column": {
+                            "type": "string", 
+                            "description": "The exact column name for the Y-axis (e.g., 'Viscosity @ 15C')."
+                        },
+                        "origin_filter": {
+                            "type": "string", 
+                            "description": "Optional: Filter the plot by a specific origin (e.g., 'Gulf of Mexico, USA')."
+                        }
+                    },
+                    "required": ["x_column", "y_column"]
+                }
+            }
+        }
+    ]
     
     with st.chat_message("assistant"):
         with st.spinner("Analyzing database..."):
             try:
+                # 1. Call Groq with the tools
                 response = client.chat.completions.create(
                     model="openai/gpt-oss-120b", 
                     messages=[
                         {"role": "system", "content": system_instruction},
                         {"role": "user", "content": prompt}
                     ],
+                    tools=tools,
+                    tool_choice="auto", # Let the AI decide if it needs to plot
                     temperature=0.0
                 )
                 
-                answer = response.choices[0].message.content
-                st.markdown(answer)
-                st.session_state.messages.append({"role": "assistant", "content": answer})
-                
+                response_message = response.choices[0].message
+                tool_calls = response_message.tool_calls
+
+                if tool_calls:
+                    for tool_call in tool_calls:
+                        function_args = json.loads(tool_call.function.arguments)
+                        
+                        if tool_call.function.name == "plot_data":
+                            st.write("*(Generating plot...)*")
+                            x_col = function_args.get("x_column")
+                            y_col = function_args.get("y_column")
+                            origin = function_args.get("origin_filter")
+                            
+                            # Filter the data for the plot
+                            plot_df = df.copy()
+                            if origin and origin != "All":
+                                plot_df = plot_df[plot_df["Origin"].str.contains(origin, case=False, na=False)]
+                            
+                            # Clean data for plotting
+                            plot_df = plot_df.dropna(subset=[x_col, y_col])
+                            plot_df[x_col] = pd.to_numeric(plot_df[x_col], errors='coerce')
+                            plot_df[y_col] = pd.to_numeric(plot_df[y_col], errors='coerce')
+
+                            if not plot_df.empty:
+                                # Create the Plotly chart
+                                fig = px.scatter(
+                                    plot_df, 
+                                    x=x_col, 
+                                    y=y_col, 
+                                    color="Sample_Number",
+                                    hover_data=["Weathering_Fraction", "Origin"],
+                                    title=f"{y_col} vs {x_col} ({origin if origin else 'All Samples'})"
+                                )
+                                fig.update_layout(title_font=dict(size=16, color="red"), font=dict(size=12, color="#1f77b4"))
+                                
+                                st.plotly_chart(fig, use_container_width=True)
+                                
+                                # Inform the AI that the plot was successful
+                                st.session_state.messages.append(response_message)
+                                st.session_state.messages.append({
+                                    "tool_call_id": tool_call.id, "role": "tool", "name": "plot_data", 
+                                    "content": f"Plot successfully generated for {len(plot_df)} data points."
+                                })
+                            else:
+                                st.warning(f"Could not find data to plot for {x_col} and {y_col}.")
+
+                    # 2. Second API Call: Ask AI to summarize the plot
+                    second_response = client.chat.completions.create(
+                        model="openai/gpt-oss-120b",
+                        messages=st.session_state.messages
+                    )
+                    answer = second_response.choices[0].message.content
+                    st.markdown(answer)
+                    st.session_state.messages.append({"role": "assistant", "content": answer})
+                else:
+                    # No tool needed, just print the text answer
+                    answer = response_message.content
+                    st.markdown(answer)
+                    st.session_state.messages.append({"role": "assistant", "content": answer})
+
             except Exception as e:
                 st.error(f"Error: {e}")
 
