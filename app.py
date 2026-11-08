@@ -405,9 +405,32 @@ if prompt := st.chat_input("E.g., Which Gulf of Mexico sample has the highest Vi
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # --- THE FIX: ONLY SEND THE FIRST 30 ROWS TO PREVENT TOKEN LIMIT ERROR ---
-    # This gives the AI the column headers and enough context without crashing Groq.
-    data_context = df.head(30).to_csv(index=False) 
+    # --- SMART RETRIEVAL: Filter the data based on the user's prompt ---
+    # We create a smaller dataframe to send to the AI to save tokens.
+    # If the user mentions a location, we filter by it.
+    search_df = df.copy()
+    prompt_lower = prompt.lower()
+    
+    # Check if the user is asking about a specific origin
+    found_origin = False
+    for origin in df["Origin"].unique():
+        # If a word in the origin (like "gulf", "alaska") is in the prompt
+        if str(origin).lower().split(",")[0] in prompt_lower:
+            search_df = df[df["Origin"] == origin]
+            found_origin = True
+            break
+            
+    # If they ask about a specific sample number (e.g., ESTS 506)
+    ests_match = re.search(r'(ests\s?\d+)', prompt_lower)
+    if ests_match:
+        search_df = df[df["Sample_Number"].str.lower() == ests_match.group(1).replace(" ", " ").strip()]
+        
+    # If we didn't find a specific filter, just send the first 50 rows to give context
+    if len(search_df) == len(df):
+        search_df = df.head(50)
+
+    # Send the filtered data to the AI!
+    data_context = search_df.to_csv(index=False) 
 
     system_instruction = f"""
     You are an expert petrochemical data assistant. 
