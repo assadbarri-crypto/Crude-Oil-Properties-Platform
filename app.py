@@ -19,7 +19,7 @@ st.markdown("""
     <style>
     /* 1. Light Yellow Background (Targets the main app container) */
     .stApp, [data-testid="stAppViewContainer"] { 
-        background-color: #ffffe0 !important; 
+        background-color: #ffffff !important; 
     }
     
     /* 2. Main Page Title (H1) */
