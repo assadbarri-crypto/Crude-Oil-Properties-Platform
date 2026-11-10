@@ -80,15 +80,25 @@ st.markdown("""
         font-size: 15px !important; 
     }
 
-    /* 10. FIX MULTISELECT TAGS TEXT COLOR */
+    /* 10. FIX MULTISELECT TAGS AND INPUT BOX */
+    /* Style the little tags (bubbles) */
     [data-testid="stMultiSelect"] [data-baseweb="tag"] {
         background-color: #1f77b4 !important; /* Blue background */
         color: #ffffff !important;            /* White text */
     }
     
-    /* Make sure the text inside the tag is white */
     [data-testid="stMultiSelect"] [data-baseweb="tag"] span {
         color: #ffffff !important; 
+    }
+
+    /* Style the main input box background to be white */
+    [data-testid="stMultiSelect"] [data-baseweb="select"] > div {
+        background-color: #ffffff !important;
+    }
+    
+    /* Ensure the typed text inside the box is brown */
+    [data-testid="stMultiSelect"] input {
+        color: #8B4513 !important;
     }
     </style>
     """, unsafe_allow_html=True)
