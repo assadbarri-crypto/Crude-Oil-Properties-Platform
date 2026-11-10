@@ -80,18 +80,20 @@ st.markdown("""
         font-size: 15px !important; 
     }
 
-    /* 10. FIX MULTISELECT TAGS TEXT COLOR */
-    /* Force the text inside the selected tags to be white */
+    /* 10. MULTISELECT TAGS - RED TEXT, LIGHT GREY BACKGROUND */
+    /* Force the text inside the tags to be red */
     [data-testid="stMultiSelect"] [data-baseweb="tag"] span {
-        color: #ffffff !important; 
+        color: #ff0000 !important; 
+        font-weight: bold !important;
     }
 
-    /* Force the background of the tags to be blue so the white text is readable */
+    /* Force the background of the tags to be light grey */
     [data-testid="stMultiSelect"] [data-baseweb="tag"] {
-        background-color: #1f77b4 !important; 
+        background-color: #f0f2f6 !important; 
+        border: 1px solid #ff0000 !important;
     }
     
-    /* Ensure the white background of the main box stays clean */
+    /* Ensure the main box background stays clean (light grey) */
     [data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
         background-color: #ffffff !important; 
     }
@@ -241,10 +243,10 @@ available_compare_samples = base_compare_pool[
 available_compare_samples = sorted(list(set(available_compare_samples)), key=extract_ests_number)
 
 compare_samples = st.multiselect(
-    "Select samples to compare (Select up to 2):", 
+    "Select samples to compare:", 
     options=available_compare_samples,
     default=available_compare_samples[:2] if len(available_compare_samples) >= 2 else available_compare_samples,
-    max_selections=2
+    
 )
 
 property_options = [
