@@ -111,7 +111,7 @@ def extract_ests_number(ests_str):
     match = re.search(r'(\d+)', str(ests_str))
     return int(match.group(1)) if match else 0
 
-st.title("Crude Oil Properties Platform")
+st.title("🛢️ Crude Oil Properties Platform")
 st.markdown("Select a sample to view its properties, or use the comparison tool below.")
 
 filter_col1, filter_col2 = st.columns(2)
