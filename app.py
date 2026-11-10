@@ -424,7 +424,7 @@ if prompt := st.chat_input("E.g., Plot density versus viscosity for Gulf of Mexi
         search_df = df[df["Sample_Number"].str.lower() == ests_match.group(1).replace(" ", " ").strip()]
         
     if len(search_df) == len(df):
-        search_df = df.head(50)
+        search_df = df.head(150)
 
     data_context = search_df.to_csv(index=False) 
 
