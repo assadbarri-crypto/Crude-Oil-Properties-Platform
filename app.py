@@ -10,6 +10,7 @@ import io
 # ---------------------------------------------------------
 st.set_page_config(
     page_title="Crude Oil Properties Platform", 
+    page_icon="🛢️", 
     page_icon="https://cdn-icons-png.flaticon.com/512/8028/8028133.png", 
     layout="wide"
 )
@@ -17,10 +18,6 @@ st.set_page_config(
 # --- CSS FOR FONT COLORS, SIZES, AND BACKGROUND ---
 st.markdown("""
     <style>
-    /* 1. Force White Background */
-    html, body, [data-testid="stAppViewContainer"], .stApp {
-        background-color: #ffffff !important; 
-    }
     
     /* Make sure the header is transparent so it doesn't block the background */
     [data-testid="stHeader"] {
