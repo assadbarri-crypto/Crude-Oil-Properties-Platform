@@ -241,9 +241,10 @@ available_compare_samples = base_compare_pool[
 available_compare_samples = sorted(list(set(available_compare_samples)), key=extract_ests_number)
 
 compare_samples = st.multiselect(
-    "Select samples to compare:", 
+    "Select samples to compare (Select up to 2):", 
     options=available_compare_samples,
-    default=available_compare_samples[:2] if len(available_compare_samples) >= 2 else available_compare_samples
+    default=available_compare_samples[:2] if len(available_compare_samples) >= 2 else available_compare_samples,
+    max_selections=2
 )
 
 property_options = [
