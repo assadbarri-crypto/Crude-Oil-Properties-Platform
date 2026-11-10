@@ -9,7 +9,7 @@ import io
 # 1. PAGE CONFIGURATION & CUSTOM CSS
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Crude Oil Properties Platform", 
+    page_title="🛢️ Crude Oil Properties Platform", 
     page_icon="🛢️", 
     #page_icon="https://cdn-icons-png.flaticon.com/512/8028/8028133.png", 
     layout="wide"
@@ -78,29 +78,6 @@ st.markdown("""
     [data-testid="stMetricLabel"] { 
         color: #1f77b4 !important; 
         font-size: 15px !important; 
-    }
-
-    /* 10. FIX MULTISELECT TAGS AND INPUT BOX */
-    /* Style the little tags (bubbles) */
-    [data-testid="stMultiSelect"] [data-baseweb="tag"] {
-        background-color: #1f77b4 !important; /* Keep tags blue */
-        color: #ffffff !important;            /* Keep tag text white */
-        border: 1px solid #ffffff !important; /* Add a white border for contrast */
-    }
-    
-    [data-testid="stMultiSelect"] [data-baseweb="tag"] span {
-        color: #ffffff !important; 
-    }
-
-    /* Change the main input box background to Light Green */
-    [data-testid="stMultiSelect"] [data-baseweb="select"] > div {
-        background-color: #e0f7fa !important; /* Light Green/Cyan background */
-        border: 1px solid #1f77b4 !important; /* Blue border around the box */
-    }
-    
-    /* Ensure the typed text inside the box is dark brown */
-    [data-testid="stMultiSelect"] input {
-        color: #8B4513 !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -490,6 +467,10 @@ if prompt := st.chat_input("E.g., Plot density versus viscosity for Gulf of Mexi
                         "origin_filter": {
                             "type": "string", 
                             "description": "Optional: Filter the plot by a specific origin (e.g., 'Gulf of Mexico, USA')."
+                        },
+                        "weathering_filter": {
+                            "type": "string",
+                            "description": "Optional: Filter the plot by a specific weathering fraction (e.g., 'W0')."
                         }
                     },
                     "required": ["x_column", "y_column"]
