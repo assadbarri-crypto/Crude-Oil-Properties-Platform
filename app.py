@@ -80,28 +80,20 @@ st.markdown("""
         font-size: 15px !important; 
     }
 
-    /* 10. MULTISELECT BOX - YELLOW BACKGROUND */
-    /* Target the main container of the multiselect box */
-    [data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
-        background-color: #ffffe0 !important; /* Light Yellow */
-        border: 1px solid #1f77b4 !important; /* Blue border */
-    }
-
-    /* Target the little tags (bubbles) to make them blend in or match */
-    [data-testid="stMultiSelect"] [data-baseweb="tag"] {
-        background-color: #ffffe0 !important; /* Light Yellow */
-        color: #8B4513 !important;            /* Dark Brown text */
-        border: 1px solid #8B4513 !important; /* Dark Brown border */
-    }
-
-    /* Ensure the text inside the tags is dark brown */
+    /* 10. FIX MULTISELECT TAGS TEXT COLOR */
+    /* Force the text inside the selected tags to be white */
     [data-testid="stMultiSelect"] [data-baseweb="tag"] span {
-        color: #8B4513 !important; 
+        color: #ffffff !important; 
     }
 
-    /* Ensure typed text is dark brown */
-    [data-testid="stMultiSelect"] input {
-        color: #8B4513 !important;
+    /* Force the background of the tags to be blue so the white text is readable */
+    [data-testid="stMultiSelect"] [data-baseweb="tag"] {
+        background-color: #1f77b4 !important; 
+    }
+    
+    /* Ensure the white background of the main box stays clean */
+    [data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
+        background-color: #ffffff !important; 
     }
     </style>
     """, unsafe_allow_html=True)
