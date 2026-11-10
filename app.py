@@ -83,20 +83,22 @@ st.markdown("""
     /* 10. FIX MULTISELECT TAGS AND INPUT BOX */
     /* Style the little tags (bubbles) */
     [data-testid="stMultiSelect"] [data-baseweb="tag"] {
-        background-color: #1f77b4 !important; /* Blue background */
-        color: #ffffff !important;            /* White text */
+        background-color: #1f77b4 !important; /* Keep tags blue */
+        color: #ffffff !important;            /* Keep tag text white */
+        border: 1px solid #ffffff !important; /* Add a white border for contrast */
     }
     
     [data-testid="stMultiSelect"] [data-baseweb="tag"] span {
         color: #ffffff !important; 
     }
 
-    /* Style the main input box background to be white */
+    /* Change the main input box background to Light Green */
     [data-testid="stMultiSelect"] [data-baseweb="select"] > div {
-        background-color: #ffffff !important;
+        background-color: #e0f7fa !important; /* Light Green/Cyan background */
+        border: 1px solid #1f77b4 !important; /* Blue border around the box */
     }
     
-    /* Ensure the typed text inside the box is brown */
+    /* Ensure the typed text inside the box is dark brown */
     [data-testid="stMultiSelect"] input {
         color: #8B4513 !important;
     }
