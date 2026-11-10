@@ -17,9 +17,14 @@ st.set_page_config(
 # --- CSS FOR FONT COLORS, SIZES, AND BACKGROUND ---
 st.markdown("""
     <style>
-    /* 1. Light Yellow Background (Targets the main app container) */
-    .stApp, [data-testid="stAppViewContainer"] { 
+    /* 1. Force White Background */
+    html, body, [data-testid="stAppViewContainer"], .stApp {
         background-color: #ffffff !important; 
+    }
+    
+    /* Make sure the header is transparent so it doesn't block the background */
+    [data-testid="stHeader"] {
+        background-color: transparent !important;
     }
     
     /* 2. Main Page Title (H1) */
