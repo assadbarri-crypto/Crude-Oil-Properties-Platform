@@ -9,7 +9,7 @@ import io
 # 1. PAGE CONFIGURATION & CUSTOM CSS
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="🛢️ Crude Oil Properties Platform", 
+    page_title="Crude Oil Properties Platform", 
     page_icon="🛢️", 
     #page_icon="https://cdn-icons-png.flaticon.com/512/8028/8028133.png", 
     layout="wide"
