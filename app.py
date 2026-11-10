@@ -79,6 +79,17 @@ st.markdown("""
         color: #1f77b4 !important; 
         font-size: 15px !important; 
     }
+
+    /* 10. FIX MULTISELECT TAGS TEXT COLOR */
+    [data-testid="stMultiSelect"] [data-baseweb="tag"] {
+        background-color: #1f77b4 !important; /* Blue background */
+        color: #ffffff !important;            /* White text */
+    }
+    
+    /* Make sure the text inside the tag is white */
+    [data-testid="stMultiSelect"] [data-baseweb="tag"] span {
+        color: #ffffff !important; 
+    }
     </style>
     """, unsafe_allow_html=True)
 
